@@ -12,10 +12,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["OrderSystem/ProductService/ProductService/ProductService.csproj", "OrderSystem/ProductService/ProductService/"]
-RUN dotnet restore "./OrderSystem/ProductService/ProductService/ProductService.csproj"
+COPY ["ProductService.csproj", "."]
+RUN dotnet restore "./ProductService.csproj"
 COPY . .
-WORKDIR "/src/OrderSystem/ProductService/ProductService"
+WORKDIR "/src/."
 RUN dotnet build "./ProductService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Diese Stufe wird verwendet, um das Dienstprojekt zu veröffentlichen, das in die letzte Phase kopiert werden soll.

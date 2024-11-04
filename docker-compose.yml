@@ -3,7 +3,7 @@ version: '3.8'
 services:
   productservice:
     build:
-      context: . /ProductService/ProductService
+      context: ./OrderSystem/ProductService/ProductService
       dockerfile: Dockerfile
     ports:
       - "5001:80"
@@ -16,7 +16,7 @@ services:
 
   orderservice:
     build:
-      context: . /OrderService/OrderService
+      context: ./OrderSystem/OrderService/OrderService
       dockerfile: Dockerfile
     ports:
       - "5002:80"
