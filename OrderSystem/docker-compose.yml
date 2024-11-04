@@ -9,7 +9,7 @@ services:
       - "5001:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=ProductDb;User=sa;Password=Your_password123;
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ProductDb;User=sa;Password=Your_password123
     depends_on:
       - db
       - rabbitmq
@@ -22,7 +22,7 @@ services:
       - "5002:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=OrderDb;User=sa;Password=Your_password123;
+      - ConnectionStrings__DefaultConnection=Server=db;Database=OrderDb;User=sa;Password=Your_password123
     depends_on:
       - db
       - rabbitmq
@@ -33,8 +33,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
 
   db:
     image: mcr.microsoft.com/mssql/server
