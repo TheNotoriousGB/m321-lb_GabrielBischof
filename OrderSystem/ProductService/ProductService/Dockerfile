@@ -1,22 +1,30 @@
-# Verwende das offizielle .NET SDK-Image für den Build
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+# Unter https://aka.ms/customizecontainer erfahren Sie, wie Sie Ihren Debugcontainer anpassen und wie Visual Studio dieses Dockerfile verwendet, um Ihre Images fÃ¼r ein schnelleres Debuggen zu erstellen.
 
-# Setze das Arbeitsverzeichnis
+# Diese Stufe wird verwendet, wenn sie von VS im Schnellmodus ausgefÃ¼hrt wird (Standardeinstellung fÃ¼r Debugkonfiguration).
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-# Kopiere die csproj-Datei und restore die Abhängigkeiten
-COPY ./ProductService/ProductService.csproj ./ProductService/
-RUN dotnet restore ./ProductService/ProductService.csproj
 
-# Kopiere den gesamten Quellcode und baue die Anwendung
-COPY ./ProductService/. ./ProductService/
-WORKDIR /app/ProductService
-RUN dotnet publish -c Release -o out
+# Diese Stufe wird zum Erstellen des Dienstprojekts verwendet.
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["OrderSystem/ProductService/ProductService/ProductService.csproj", "OrderSystem/ProductService/ProductService/"]
+RUN dotnet restore "./OrderSystem/ProductService/ProductService/ProductService.csproj"
+COPY . .
+WORKDIR "/src/OrderSystem/ProductService/ProductService"
+RUN dotnet build "./ProductService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Verwende das offizielle .NET Runtime-Image für die Ausführung
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+# Diese Stufe wird verwendet, um das Dienstprojekt zu verÃ¶ffentlichen, das in die letzte Phase kopiert werden soll.
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./ProductService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# Diese Stufe wird in der Produktion oder bei AusfÃ¼hrung von VS im regulÃ¤ren Modus verwendet (Standard, wenn die Debugkonfiguration nicht verwendet wird).
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/ProductService/out .
-
-# Setze den Befehl zum Starten der Anwendung
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ProductService.dll"]
